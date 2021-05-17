@@ -25,7 +25,7 @@ bot = commands.Bot(command_prefix='_')
 botState = BotState()
 killThreads = False
 
-gacha = Gacha()
+gacha = Gacha(botState.enabledFranchises)
 
 def startClient():
 	loop = asyncio.new_event_loop()
@@ -124,10 +124,9 @@ async def uwu(ctx):
 	await ctx.send("uwu")
 
 @bot.command(name="pull", help="Should the bot remind you if you forget to write for a day?")
-async def pull(ctx, pullCount:int = 0):
-	pull = gacha.soloPull()
-
-	await ctx.send(f"{pull}")
+async def pull(ctx):
+	pull, isDupe = gacha.soloPull(botState.getUser(ctx))
+	await ctx.send(embed=pull.toDiscordEmbed(isDupe))
 
 
 
@@ -145,7 +144,6 @@ def mainLoop():
 
 async def mainLoopCoroutine():
 	while(not killThreads):
-		print(botState.test)
 		if botState.test or (datetime.utcnow().time().hour == Config.dayResetTime and datetime.utcnow().time().minute == 0 and not botState.dailyMessageSent):
 			print('b')
 			botState.dailyMessageSent = True

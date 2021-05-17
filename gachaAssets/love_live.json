@@ -5,7 +5,8 @@
 		"character": "Chika Takami",
 		"card_name": "Surrounded by Shooting Stars",
 		"rarity": "UR",
-		"color": "red",
+		"element": "Smile",
+		"mechanical_archetype": "Voltage",
 		"unit": "Aqours"
 	},
 	{
@@ -14,7 +15,8 @@
 		"character": "Maki Nishikino",
 		"card_name": "Into Legend",
 		"rarity": "UR",
-		"color": "green",
+		"element": "Pure",
+		"mechanical_archetype": "",
 		"unit": "μ's"
 	}
 ]

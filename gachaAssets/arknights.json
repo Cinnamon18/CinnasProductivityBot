@@ -5,7 +5,8 @@
 		"character": "Hoshiguma",
 		"card_name": "",
 		"rarity": "UR",
-		"color": "yellow",
+		"element": "Melee",
+		"mechanical_archetype": "Defender",
 		"unit": "Lungmen Guard Department"
 	}
 ]

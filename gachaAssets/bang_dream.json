@@ -5,7 +5,8 @@
 		"character": "Hina Hikawa",
 		"card_name": "Welcome to the Astronomy Room!",
 		"rarity": "UR",
-		"color": "green",
+		"element": "Pure",
+		"mechanical_archetype": "Scorer",
 		"unit": "Pastel Pallets"
 	}
 ]
