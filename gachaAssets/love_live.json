@@ -1,0 +1,20 @@
+[
+	{
+		"franchise": "Love Live!",
+		"img_url": "https://pbs.twimg.com/media/ELARYkXWwAAgG__?format=jpg&name=large",
+		"character": "Chika Takami",
+		"card_name": "Surrounded by Shooting Stars",
+		"rarity": "UR",
+		"color": "red",
+		"unit": "Aqours"
+	},
+	{
+		"franchise": "Love Live!",
+		"img_url": "https://i.schoolido.lu/c/456idolizedMaki.png",
+		"character": "Maki Nishikino",
+		"card_name": "Into Legend",
+		"rarity": "UR",
+		"color": "green",
+		"unit": "μ's"
+	}
+]

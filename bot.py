@@ -16,6 +16,7 @@ from sprint import Sprint, SprintPhase
 from botState import BotState
 from writer import Writer
 from config import Config
+from gacha import Gacha
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -23,6 +24,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='_')
 botState = BotState()
 killThreads = False
+
+gacha = Gacha()
 
 def startClient():
 	loop = asyncio.new_event_loop()
@@ -120,6 +123,11 @@ async def uwu(ctx):
 	botState.writers[ctx.author.id].streakLength = 5
 	await ctx.send("uwu")
 
+@bot.command(name="pull", help="Should the bot remind you if you forget to write for a day?")
+async def pull(ctx, pullCount:int = 0):
+	pull = gacha.soloPull()
+
+	await ctx.send(f"{pull}")
 
 
 
