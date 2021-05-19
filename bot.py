@@ -9,84 +9,40 @@ from datetime import datetime
 import asyncio
 import traceback
 import threading
+import re
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from sprint import Sprint, SprintPhase
 from botState import BotState
-from writer import Writer
+from user import User
 from config import Config
 from gacha import Gacha
+from goal import Goal
+from util import idsFromPings
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='_')
+bot = commands.Bot(command_prefix='!')
 botState = BotState()
 killThreads = False
 
 gacha = Gacha(botState.enabledFranchises)
-
-def startClient():
-	loop = asyncio.new_event_loop()
-	asyncio.set_event_loop(loop)
-	bot.run(TOKEN)
 
 
 
 @bot.event
 async def on_ready():
 	for guild in bot.guilds:
-		print(str(bot.user) + " is connected to server " + str(guild))
+		print(f"{bot.user} is connected to server {guild} with members {guild.members}")
 
 @bot.event
 async def on_error(event, *args, **kwargs):
-	print(event)
 	with open('err.log', 'a') as f:
 		if event == 'on_message':
 			f.write(f'Unhandled message: {args[0]}\n')
 		else:
 			raise
-
-@bot.command(name="sprint", help="Starts a writing sprint")
-async def sprint(ctx, sprintLength: int=0):
-	if not botState.curSprint == None:
-		await ctx.send("Sprint already in progress!")
-		return
-
-	if sprintLength == 0:
-		sprintLength = Config.defaultSprintLength
-
-	await ctx.send("Starting a " + str(sprintLength) + " minute sprint! Join with _join!")
-	botState.curSprint = Sprint(ctx.guild, ctx.message.channel, time.time(), 60 * sprintLength)
-	await waitForUsersToJoin()
-
-@sprint.error
-async def sprint_error(ctx, error):
-	print(error)
-	print(traceback.format_exc())
-	await ctx.send("Bot encountered an error D: let @Cinnamon18#1729 know. They should alr have all the logs if u send them the time it happened.")
-
-@bot.command(name="join", help="Joins a writing sprint")
-async def join(ctx, wordCount: int=0):
-	if(not botState.curSprint or not botState.curSprint.sprintPhase == SprintPhase.JOIN):
-		await ctx.send("Can't join a sprint right now!")
-		return
-
-	botState.getUserCtx(ctx).currentSprintStartingWords = wordCount
-	botState.curSprint.participants.add(botState.getUserCtx(ctx))
-	await ctx.send(f"{ctx.author.mention} joined the sprint with {wordCount} words!")
-
-
-@bot.command(name="wc", help="")
-async def wc(ctx, wordCount: int):
-	if(not botState.curSprint or not botState.curSprint.sprintPhase == SprintPhase.REPORT_WORDCOUNT):
-		await ctx.send("Can't report word count right now!")
-		return
-	
-	botState.getUserCtx(ctx).currentSprintWords = wordCount
-	await ctx.send(f"{ctx.author.mention} wrote {wordCount} words!")
-
 
 @bot.command(name="setStreakTracking", help="Should the bot remind you if you forget to write for a day?")
 async def setStreakTracking(ctx, setStreakTracking: bool):
@@ -96,89 +52,153 @@ async def setStreakTracking(ctx, setStreakTracking: bool):
 	await ctx.send(f"Streak tracking {streakTrackStatus} for user {ctx.author}")
 	await ctx.send(f"Current streak: {botState.getUserCtx(ctx).streakLength}")
 
-# This is such an unscalable way of doing this. But for now, to get it off the ground,
-async def waitForUsersToJoin():
-	await asyncio.sleep(Config.timeToWaitForSprintStart)
-	await botState.curSprint.channel.send("Get writing!!!")
-	botState.curSprint.sprintPhase = SprintPhase.WRITE
-	await asyncio.sleep(botState.curSprint.sprintLength)
-	await botState.curSprint.channel.send("That concludes the sprint! Drop your word counts here.")
-	botState.curSprint.sprintPhase = SprintPhase.REPORT_WORDCOUNT
-	await asyncio.sleep(Config.timeToWaitForWordCounts)
-	await botState.curSprint.channel.send("Congrats everyone!")
-	for participant in botState.curSprint.participants:
-		wordsWritten = participant.currentSprintWords - participant.currentSprintStartingWords
-		await botState.curSprint.channel.send(f"@{participant.discordId}: {wordsWritten} words ({wordsWritten / botState.curSprint.sprintLength:.0f} wpm)")
-
-	botState.lastUsedChannel = botState.curSprint.channel
-	botState.curSprint = None
-
 @bot.command(name="uwu", help="Should the bot remind you if you forget to write for a day?")
 async def uwu(ctx):
-	botState.test = True
 	botState.lastUsedChannel = ctx.message.channel
-	botState.writers[ctx.author.id] = Writer(ctx.author.id)
-	botState.writers[ctx.author.id].isStreakTracking = True
-	botState.writers[ctx.author.id].didWriteToday = True
-	botState.writers[ctx.author.id].streakLength = 5
+	botState.test = True
+	# botState.lastUsedChannel = ctx.message.channel
+	# botState.users[ctx.author.id] = User(ctx.author.id)
+	# botState.users[ctx.author.id].isStreakTracking = True
+	# botState.users[ctx.author.id].goals = []
+	# botState.users[ctx.author.id].goals.append(Goal("write!"))
+	# botState.users[ctx.author.id].goals[0].didGoalToday = True
+	# botState.users[ctx.author.id].streakLength = 5
 	await ctx.send("uwu")
+
+@bot.command(name="gachaInfo", help="Get info about the gacha rules.")
+async def gachaInfo(ctx):
+	await ctx.send(f'''**Gacha rules:**
+Crystals per pull: {Config.crystalsPerPull}
+Pitty: Not implemented
+Sparking: Not implemented
+''')
 
 @bot.command(name="pull", help="Should the bot remind you if you forget to write for a day?")
 async def pull(ctx):
-	pull, isDupe = gacha.soloPull(botState.getUser(ctx))
+	user = botState.getUserCtx(ctx)
+	pull, isDupe = gacha.soloPull(user)
+
+	if not pull:
+		await ctx.send(f"You only have {user.crystals} crystals. You need {Config.crystalsPerPull} to pull. Achieve your daily goals to pull more!")
+		return
+
 	await ctx.send(embed=pull.toDiscordEmbed(isDupe))
 
+@bot.command(name="giveMeCrystals", help="Should the bot remind you if you forget to write for a day?")
+async def giveMeCrystals(ctx, crystalCount:int):
+	botState.getUserCtx(ctx).crystals += crystalCount
+	await ctx.send(f"Gave user <@!{ctx.author.id}> {crystalCount} crystals")
+
+@bot.command(name="createDaily", help="Should the bot remind you if you forget to write for a day?")
+async def createDaily(ctx, goalName:str, botIntegrationStr: str = ""):
+	user = botState.getUserCtx(ctx)
+
+	if not botIntegrationStr:
+		user.goals.append(Goal(goalName))
+		await ctx.send(f"Successfully created goal {goalName}")
+	elif idsFromPings(botIntegrationStr) in Goal.botIntegrations:
+		user.goals.append(Goal(goalName, Goal.botIntegrations[idsFromPings(botIntegrationStr)]))
+		await ctx.send(f"Successfully created goal {goalName} integrated into bot <@!{botIntegrationStr}>")
+	else:
+		await ctx.send(f"Sorry, no integration found for bot <@!{botIntegrationStr}>")
+
+@createDaily.error
+async def createDailyError(ctx, error):
+	print(error)
+	print(traceback.format_exc())
+	await ctx.send(f'''I couldn't understand your daily goal format! Please phrase it as `!createDaily \"Goal name\"`, for example `!createDaily "Exercise every day!"
+	If you wish to use a bot integration, you can instead use `!createDaily \"Goal Name" @bot`, for example `!createDaily "Write once a day!" @Sprinto#2517`
+	''')
+
+@bot.command(name="completeDaily", help="Should the bot remind you if you forget to write for a day?")
+async def completeDaily(ctx, goalName:str):
+	user = botState.getUserCtx(ctx)
+
+	foundGoal = False
+
+	for goal in user.goals:
+		if goal.name == goalName:
+			goal.didGoalToday = True
+			foundGoal = True
+			await ctx.send(f"Completed goal {goal.name}!")
+
+	if not foundGoal:
+		await ctx.send(f"Couldn't find any daily goals with name {goalName}")
+
+
+@bot.command(name="tba")
+async def tba(ctx):
+	await sendBannerAnnouncement(ctx.message.channel)
+
+# @bot.event
+# async def on_message(message):
+# 	if message.author == bot.user:
+# 		return
+	
+# 	print(message.content)
+# 	print(message.author)
+
+# 	for botIntegration in botState.botIntegrations:
+# 		botIntegration.detectBotHook(message, botState)
 
 
 
 
-async def sendMsg(message):
-	send_fut = asyncio.run_coroutine_threadsafe(sendMsgHelper(message), botThread)
-	send_fut.result()
+async def sendMsg(message, channel = None):
+	await bot.wait_until_ready() 
+	if channel:
+		await channel.send(message)
+	else: 
+		await botState.lastUsedChannel.send(message)
 
-async def sendMsgHelper(message):
-	await botState.lastUsedChannel.send(message)
+async def sendEmbed(embed, channel = None):
+	await bot.wait_until_ready()  
+	if channel:
+		await channel.send(embed=embed)
+	else: 
+		await botState.lastUsedChannel.send(embed=embed)
 
-def mainLoop():
-	asyncio.run(mainLoopCoroutine())
+async def sendBannerAnnouncement(channel):
+	await sendMsg("Today's Banner URs:", channel)
+	for card in gacha.rateUpURs:
+		await sendEmbed(card.toDiscordEmbed(False), channel)
+	await sendMsg("Today's Banner SSRs:", channel)
+	for card in gacha.rateUpSSRs:
+		await sendEmbed(card.toDiscordEmbed(False), channel)
 
-async def mainLoopCoroutine():
-	while(not killThreads):
+async def mainLoop():
+	while(True):
+		await asyncio.sleep(10)
+
 		if botState.test or (datetime.utcnow().time().hour == Config.dayResetTime and datetime.utcnow().time().minute == 0 and not botState.dailyMessageSent):
-			print('b')
 			botState.dailyMessageSent = True
 
-			if any(writer.isStreakTracking for writer in botState.writers.values()) and botState.lastUsedChannel:
-				await sendMsg("Congrats all our writers! Today's streak maintainers:")
-				for writer in botState.writers.values():
-					if not writer.isStreakTracking:
+			if any(user.isStreakTracking for user in botState.users.values()) and botState.lastUsedChannel:
+				await sendMsg("Congrats all our users! Today's streak maintainers:")
+				for user in botState.users.values():
+					if not user.isStreakTracking:
 						break
 
-					if writer.didWriteToday:
-						writer.streakLength += 1
-					else:
-						writer.streakLength = 0
-					
-					if not writer.didWriteToday:
-						await botState.lastUsedChannel.send("@" + str(writer.discordId) + ": streak broken D: " )
-					else:
-						await botState.lastUsedChannel.send("@" + str(writer.discordId) + ": " + str(writer.streakLength) + " day streak! " )
+					unaccomplishedGoals = user.getUnaccomplishedGoals()
 
+					if unaccomplishedGoals:
+						user.streakLength = 0
+						await sendMsg(f"<@!{user.discordId}>: streak broken D:\nMissed goals: {', '.join([goal.name for goal in unaccomplishedGoals])}" )
+					else:
+						await sendMsg(f"<@!{user.discordId}>: {user.streakLength} day streak! You recieved: {user.calculateDailyRewards()} crystals for your efforts.")
+						user.crystals += user.calculateDailyRewards()
+						user.streakLength += 1
+
+
+			botState.setAllGoalsFalse()
+			
+			await sendBannerAnnouncement(botState.lastUsedChannel)
 
 			await asyncio.sleep(120)
 			botState.dailyMessageSent = False
 		
-		await asyncio.sleep(2)
+		botState.test = False
+		
 
-# mainThread = threading.Thread(target=mainLoop)
-# mainThread.start()
-
-botThread = threading.Thread(target=startClient)
-botThread.start()
-
-mainLoop()
-
-print("Joining main thread")
-# killThreads = True
-# mainThread.join()
-# print("Main thread joined successfully")
+bot.loop.create_task(mainLoop())
+bot.run(TOKEN)

@@ -2,45 +2,69 @@ import json
 import random
 import math
 from card import Card
-from writer import Writer
+from user import User
+from config import Config
 
 class Gacha():	
-	rarities = ["UR", "SSR", "SR", "R"]
-	probabilities = [0.05, 0.1, 0.2, 0.8]
 
 	def __init__(self, enabledFranchises):
 		self.cardsByUID = dict()
 		self.cardsByRarity = dict()
 		
+		for rarity in Config.rarities:
+			self.cardsByRarity[rarity] = []
+		
 		for franchise in enabledFranchises:
 			
-			for rarity in Gacha.rarities:
-				self.cardsByRarity[rarity] = []
 
 			with open(f"gachaAssets/{franchise}.json") as franchiseFile:
 				cards = json.load(franchiseFile)
 
 				for cardDict in cards:
 					card = Card(cardDict)
-					self.cardsByUID[hash(card)] = card
+					print(card)
+					self.cardsByUID[card.uid] = card
+					self.cardsByRarity[card.rarity].append(card)
+						
+		self.rateUpURs, self.rateUpSSRs = self.getRateUpCards()
 
-					for rarity in Gacha.rarities:
-						if card.rarity == rarity:
-							self.cardsByRarity[rarity].append(card)
 				
 
-	def soloPull(self, puller:Writer) -> (Card, bool):
-		cardRarity = random.choices(Gacha.rarities, Gacha.probabilities)
+	def soloPull(self, puller:User) -> (Card, bool):
+		'''Performs a solo pull for the given user if they have enough crystals, and adds it to their inventory. If they don't have enough crystals, the method returns (None, None)'''
+		if puller.crystals < Config.crystalsPerPull:
+			return None, None
+
+		cardRarity = random.choices(Config.rarities, Config.probabilities)
 		cardRarity = "UR"
-		card = random.choice(self.cardsByRarity[cardRarity])
-		isDupe = hash(card) in puller.gachaCardsUIDs
-		print(hash(card))
-		print([id for id in puller.gachaCardsUIDs])
-		puller.addCard(card)
+
+		card = None
+
+		if cardRarity == "UR":
+			if random.uniform(0, 1) < Config.rateUpURRates:
+				card = random.choice(self.rateUpURs)
+		elif cardRarity == "SSR":
+			if random.uniform(0, 1) < Config.rateUpURRates:
+				card = random.choice(self.rateUpSSRs)
+
+		if card == None:
+			card = random.choice(self.cardsByRarity[cardRarity])
+
+		isDupe = card.uid in puller.gachaCardsUIDs
+		if not isDupe: # Check should be redundant bc it's a set but just in case I change it to a list down the line and forget.
+			puller.addCard(card)
 		return card, isDupe
 
-	def pullMultiple(self, puller:Writer, pulls):
+	def pullMultiple(self, puller:User, pulls):
 		pulledCards = []
 		for i in range(pulls):
 			pulledCards.append(soloPull(puller))
 		return pulledCards
+
+	def getRateUpCards(self):		
+		ursToPick = Config.rateUpURCount if len(self.cardsByRarity['UR']) > Config.rateUpURCount else len(self.cardsByRarity['UR'])
+		ssrsToPick = Config.rateUpURCount if len(self.cardsByRarity['SSR']) > Config.rateUpURCount else len(self.cardsByRarity['SSR'])
+
+		rateUpURs = random.choices(self.cardsByRarity['UR'], k=ursToPick)
+		rateUpSSRs = random.choices(self.cardsByRarity['SSR'], k=ssrsToPick)
+		return rateUpURs, rateUpSSRs

@@ -1,5 +1,6 @@
 [
 	{
+		"uid": "love_live_0",
 		"franchise": "Love Live!",
 		"img_url": "https://pbs.twimg.com/media/ELARYkXWwAAgG__?format=jpg&name=large",
 		"character": "Chika Takami",
@@ -10,6 +11,7 @@
 		"unit": "Aqours"
 	},
 	{
+		"uid": "love_live_1",
 		"franchise": "Love Live!",
 		"img_url": "https://i.schoolido.lu/c/456idolizedMaki.png",
 		"character": "Maki Nishikino",

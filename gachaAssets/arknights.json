@@ -1,5 +1,6 @@
 [
 	{
+		"uid": "arknights_0",
 		"franchise": "Arknights",
 		"img_url": "https://static.wikia.nocookie.net/mrfz/images/e/eb/Hoshiguma_Elite_2.png/revision/latest/scale-to-width-down/620?cb=20190627031440",
 		"character": "Hoshiguma",
@@ -8,5 +9,16 @@
 		"element": "Melee",
 		"mechanical_archetype": "Defender",
 		"unit": "Lungmen Guard Department"
+	},
+	{
+		"uid": "arknights_1",
+		"franchise": "Arknights",
+		"img_url": "https://static.wikia.nocookie.net/mrfz/images/b/bc/Amiya.png/revision/latest/scale-to-width-down/620?cb=20190619214408",
+		"character": "Amiya",
+		"card_name": "",
+		"rarity": "SSR",
+		"element": "Ranged",
+		"mechanical_archetype": "Caster",
+		"unit": "Rhodes Island"
 	}
 ]

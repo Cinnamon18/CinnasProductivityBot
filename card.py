@@ -1,5 +1,5 @@
 import discord
-from writer import Writer
+from user import User
 
 class Card():
 
@@ -26,6 +26,7 @@ class Card():
 	
 
 	def __init__(self, cardJson):
+		self.uid = cardJson['uid']
 		self.franchise = cardJson['franchise']
 		self.img_url = cardJson['img_url']
 		self.character = cardJson['character']
@@ -35,6 +36,9 @@ class Card():
 		self.mechanical_archetype = cardJson['mechanical_archetype']
 		self.unit = cardJson['unit']
 	
+	def __str__(self):
+		return f"{self.uid} {self.rarity} {self.character} from {self.franchise}: {self.card_name}"
+
 	def toDiscordEmbed(self, isDupe):		
 		titleText = Card.pullNewText[self.rarity] if not isDupe else Card.pullDupeText[self.rarity]
 		titleText = f'{titleText} {self.character}'
@@ -49,5 +53,5 @@ Element: {self.element}
 Mechanical Archetype: {self.mechanical_archetype}
 Unit: {self.unit}'''
 		)
-		embed = embed.set_image(url=self.img_url)
+		embed = embed.set_image(url=self.img_url).set_footer(text=self.uid)
 		return embed
