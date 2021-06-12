@@ -10,6 +10,7 @@ class User:
 		
 		self.crystals = 0
 		self.coins = 0
+		self.sparks = 0
 		
 		self.gachaCardsUIDs = set()
 

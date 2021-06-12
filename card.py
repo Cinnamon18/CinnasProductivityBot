@@ -35,13 +35,19 @@ class Card():
 		self.element = cardJson['element']
 		self.mechanical_archetype = cardJson['mechanical_archetype']
 		self.unit = cardJson['unit']
+		self.credit = cardJson['credit']
 	
 	def __str__(self):
 		return f"{self.uid} {self.rarity} {self.character} from {self.franchise}: {self.card_name}"
 
-	def toDiscordEmbed(self, isDupe):		
-		titleText = Card.pullNewText[self.rarity] if not isDupe else Card.pullDupeText[self.rarity]
-		titleText = f'{titleText} {self.character}'
+	def toDiscordEmbed(self, isDupe):
+		if isDupe is None:
+			titleText = f'{self.character}'
+		elif not isDupe:
+			titleText = f'{Card.pullNewText[self.rarity]} {self.character}'
+		elif isDupe:
+			titleText = f'{Card.pullDupeText[self.rarity]} {self.character}'
+		
 
 		embed = discord.Embed(
 			title=titleText,
@@ -53,5 +59,5 @@ Element: {self.element}
 Mechanical Archetype: {self.mechanical_archetype}
 Unit: {self.unit}'''
 		)
-		embed = embed.set_image(url=self.img_url).set_footer(text=self.uid)
+		embed = embed.set_image(url=self.img_url).set_footer(text=f"{self.uid}  - Thanks to {self.credit}")
 		return embed

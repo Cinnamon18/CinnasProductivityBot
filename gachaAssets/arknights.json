@@ -8,7 +8,8 @@
 		"rarity": "UR",
 		"element": "Melee",
 		"mechanical_archetype": "Defender",
-		"unit": "Lungmen Guard Department"
+		"unit": "Lungmen Guard Department",
+		"credit": "Cinnamon18#1729"
 	},
 	{
 		"uid": "arknights_1",
@@ -19,6 +20,7 @@
 		"rarity": "SSR",
 		"element": "Ranged",
 		"mechanical_archetype": "Caster",
-		"unit": "Rhodes Island"
+		"unit": "Rhodes Island",
+		"credit": "Cinnamon18#1729"
 	}
 ]

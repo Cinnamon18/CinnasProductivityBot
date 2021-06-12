@@ -1,6 +1,7 @@
 from user import User
 from card import Card
 from botIntegration import Sprinto
+from config import Config
 
 class BotState():
 	def __init__(self):
@@ -18,19 +19,26 @@ class BotState():
 			"421646775749967872": Sprinto()
 		}
 
-	def getUser(self, userId: str) -> User:
+	def getUser(self, userId) -> User:
 		'''Gets a user from the list of users. If user does not exist, a new one will be created.'''
+
+		userId = str(userId) # Lmao this is causing me headaches so i'm gonna solve it this way.
 		if not userId in self.users:
 			self.users[userId] = User(userId)
-		
+
 		return self.users[userId]
 	
 	def getUserCtx(self, ctx):
 		'''Shorthand with a context.'''
+		self.lastUsedChannel = ctx.message.channel
 		return self.getUser(ctx.author.id)
+	
+	def dailyReset(self, gacha):
+		gacha.generateRateUpCards()
 
-	def setAllGoalsFalse(self):
 		for user in self.users.values():
+			user.coins += Config.coinsPerUnusedSpark * user.sparks
+			user.sparks = 0
 			for goal in user.goals:
 				goal.didGoalToday = False
 
