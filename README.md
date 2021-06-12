@@ -1,5 +1,6 @@
 # Cinnas Productivity Bot
 A productivity bot!
+Invite to your server with: https://discord.com/api/oauth2/authorize?client_id=843539518899355679&permissions=67628096&scope=bot
 
 ### Integrations
 Integrations allow other bots to automatically mark a  daily goal complete. 
