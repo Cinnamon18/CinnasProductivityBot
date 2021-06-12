@@ -36,6 +36,7 @@ gacha = Gacha(botState.enabledFranchises)
 # Just to shut up Azure lmao
 from flask import Flask
 app = Flask(__name__)
+app.run(port=8000)
 
 @app.route("/")
 def hello():
