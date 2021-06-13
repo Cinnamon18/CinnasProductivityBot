@@ -3,7 +3,7 @@ A productivity bot!
 Invite to your server with: https://discord.com/api/oauth2/authorize?client_id=843539518899355679&permissions=67628096&scope=bot
 
 ### Integrations
-Integrations allow other bots to automatically mark a  daily goal complete. 
+Integrations allow other bots to automatically mark a  daily goal complete. Well, really, it makes this bot listen for other bots saying things, and then marks a daily goal complete based on what they say.
 
 
 ## Dev Zone
@@ -12,7 +12,7 @@ Integrations allow other bots to automatically mark a  daily goal complete.
  - Run `python -m pip install -r requirements.txt`
  - Change the token in .env to the bot's real token, which you can get on the discord developer page > Application > Bot > Token
 	 - If you're deploying, you can just configure the env variable and the .env will be ignored.
- - You probably wanna `git update-index --skip-worktree .env`
+ - You probably wanna `git update-index --skip-worktree .env`, `git update-index --skip-worktree botSave.json`
 
 ### Card Properties
 Cards are stored as JSON objects with the following attributes. All keys are required, use an empty string where a reasonable value cannot be produced. Additionally, the `uid` and `rarity` keys require a value for all cards. This bot is targeted at english speakers, and will attempt to use english wherever possible.
@@ -33,4 +33,4 @@ Cards are stored as JSON objects with the following attributes. All keys are req
 
 
 ### Misc
- - Release branch is autodeployed to [https://cinnaswritingbot.azurewebsites.net](https://cinnaswritingbot.azurewebsites.net)
+ - Bot is currently deployed to `143.110.147.209` on a basic digital ocean vm.
