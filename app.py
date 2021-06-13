@@ -5,7 +5,7 @@ from flask import Flask
 print("uwu\nuwu\nuwu\nuwu\nuwu\nuwu\nuwu\nuwu\n")
 
 app = Flask(__name__)
-app.run()
+app.run(port=8000)
 # def azureWhy():
 # 	app.run(port=8000)
 # thread = Thread(target=azureWhy)
