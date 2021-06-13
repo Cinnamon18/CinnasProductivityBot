@@ -1,6 +1,9 @@
 # Just to shut up Azure lmao
 from flask import Flask
 # from threading import Thread
+
+print("uwu\nuwu\nuwu\nuwu\nuwu\nuwu\nuwu\nuwu\n")
+
 app = Flask(__name__)
 app.run(port=8000)
 # def azureWhy():
