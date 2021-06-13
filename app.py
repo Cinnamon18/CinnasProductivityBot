@@ -3,7 +3,7 @@ from flask import Flask
 # from threading import Thread
 app = Flask(__name__)
 def azureWhy():
-	app.run()
+	app.run(port=8000)
 # thread = Thread(target=azureWhy)
 # thread.start()
 @app.route("/")
