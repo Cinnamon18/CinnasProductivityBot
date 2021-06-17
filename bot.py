@@ -30,6 +30,7 @@ botState = Serialization.loadData(Config.saveFileName)
 if not botState:
 	botState = BotState()
 botState.test = False
+botState.dailyMessageSent = False
 
 gacha = Gacha(botState.enabledFranchises)
 
