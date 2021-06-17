@@ -252,6 +252,12 @@ async def mainLoop():
 	while(True):
 		await asyncio.sleep(10)
 
+		print("uwu???")
+		print(datetime.utcnow().time().minute) # == 0
+		print(datetime.utcnow().time().hour)
+		print(Config.dayResetTime)
+		print(botState.dailyMessageSent)
+
 		if botState.test or (datetime.utcnow().time().hour == Config.dayResetTime and datetime.utcnow().time().minute == 0 and not botState.dailyMessageSent):
 			botState.dailyMessageSent = True
 
