@@ -228,7 +228,7 @@ async def sendMsg(message, channel = None):
 	if channel:
 		await channel.send(message)
 	else: 
-		await botState.lastUsedChannel.send(message)
+		await channel.send(message)
 
 async def sendEmbed(embed, channel = None):
 	if not channel:
@@ -238,7 +238,7 @@ async def sendEmbed(embed, channel = None):
 	if channel:
 		await channel.send(embed=embed)
 	else: 
-		await botState.lastUsedChannel.send(embed=embed)
+		await channel.send(embed=embed)
 
 async def sendBannerAnnouncement(channel):
 	await sendMsg("**New banner!**", channel)
