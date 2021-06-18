@@ -222,7 +222,7 @@ async def giveMeCrystals(ctx, crystalCount:int):
 
 async def sendMsg(message, channel = None):
 	if not channel:
-		print("No channel object, can't send message D:")
+		print(f"No channel object, can't send message \"{message}\" D:")
 
 	await bot.wait_until_ready() 
 	if channel:
@@ -258,6 +258,7 @@ async def mainLoop():
 		print(datetime.utcnow().time().hour)
 		print(Config.dayResetTime)
 		print(botState.dailyMessageSent)
+		print((datetime.utcnow().time().hour == Config.dayResetTime and datetime.utcnow().time().minute == 0 and not botState.dailyMessageSent))
 
 		if botState.test or (datetime.utcnow().time().hour == Config.dayResetTime and datetime.utcnow().time().minute == 0 and not botState.dailyMessageSent):
 			botState.dailyMessageSent = True
